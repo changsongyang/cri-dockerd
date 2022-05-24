@@ -1,3 +1,4 @@
+//go:build linux
 // +build linux
 
 /*
@@ -22,22 +23,30 @@ import (
 	"context"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	runtimeapi "k8s.io/cri-api/pkg/apis/runtime/v1alpha2"
 )
 
 func (ds *dockerService) getContainerStats(containerID string) (*runtimeapi.ContainerStats, error) {
 	info, err := ds.client.Info()
+	logrus.Errorf("INFO: %+v", info)
 	if err != nil {
+		logrus.Error("ERROR: ", err)
 		return nil, err
 	}
 
+	logrus.Error("containerID: ", containerID)
 	statsJSON, err := ds.client.GetContainerStats(containerID)
+	logrus.Errorf("statsJSON: %+v", statsJSON)
 	if err != nil {
+		logrus.Error("ERROR: ", err)
 		return nil, err
 	}
 
 	containerJSON, err := ds.client.InspectContainerWithSize(containerID)
+	logrus.Errorf("containerJSON: %+v", containerJSON)
 	if err != nil {
+		logrus.Error("ERROR: ", err)
 		return nil, err
 	}
 
@@ -45,7 +54,9 @@ func (ds *dockerService) getContainerStats(containerID string) (*runtimeapi.Cont
 		context.Background(),
 		&runtimeapi.ContainerStatusRequest{ContainerId: containerID},
 	)
+	logrus.Errorf("statusResp: %+v", statusResp)
 	if err != nil {
+		logrus.Error("ERROR: ", err)
 		return nil, err
 	}
 	status := statusResp.GetStatus()
